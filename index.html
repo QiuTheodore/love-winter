@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>立冬快乐｜我们的第六个冬天</title>
+  <style>
+    :root{
+      --bg:#fafafa;
+      --fg:#222;
+      --sub:#777;
+      --accent:#ff6b81;
+      --accent-soft:#ffe5ea;
+      --heart:#ff7a90;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;}
+    body{
+      background:var(--bg);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,
+        "PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
+      color:var(--fg);
+      overflow:hidden;
+    }
+
+    /* 飘心背景 */
+    .hearts{
+      position:fixed;
+      inset:0;
+      overflow:hidden;
+      pointer-events:none;
+      z-index:0;
+    }
+    .heart{
+      position:absolute;
+      width:18px;
+      height:18px;
+      background:var(--heart);
+      transform:rotate(45deg);
+      opacity:.9;
+      filter:drop-shadow(0 3px 6px rgba(255,105,130,.35));
+      animation:floatUp linear forwards;
+    }
+    .heart:before,
+    .heart:after{
+      content:"";
+      position:absolute;
+      width:100%;
+      height:100%;
+      background:inherit;
+      border-radius:50%;
+    }
+    .heart:before{left:-50%;}
+    .heart:after{top:-50%;}
+    @keyframes floatUp{
+      to{
+        transform:translateY(-200vh) rotate(45deg);
+        opacity:0;
+      }
+    }
+
+    /* 顶部标题 */
+    .top-title{
+      position:fixed;
+      top:10px;
+      left:50%;
+      transform:translateX(-50%);
+      text-align:center;
+      z-index:5;
+      pointer-events:none;
+    }
+    .top-title h1{
+      font-size:20px;
+      font-weight:600;
+      letter-spacing:.4px;
+    }
+    .top-title p{
+      margin-top:4px;
+      font-size:13px;
+      color:var(--sub);
+    }
+
+    /* 中央问句+按钮 */
+    .center{
+      position:fixed;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      z-index:6;
+      text-align:center;
+      background:transparent;
+    }
+    .question{
+      font-size:17px;
+      line-height:1.7;
+      margin-bottom:18px;
+      padding:0 18px;
+    }
+    .btns{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      align-items:center;
+      position:relative;
+      width:100%;
+      max-width:480px;
+      margin:0 auto;
+    }
+    button{
+      appearance:none;
+      border:none;
+      border-radius:999px;
+      padding:10px 18px;
+      font-size:15px;
+      cursor:pointer;
+      transition:all .32s cubic-bezier(.22,.61,.36,1.1);
+      white-space:nowrap;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      box-shadow:0 6px 18px rgba(255,107,129,.28);
+      background:var(--accent);
+      color:#fff;
+      position:relative;
+      z-index:2;
+    }
+    button.secondary{
+      background:#f1f1f1;
+      color:#444;
+      box-shadow:none;
+    }
+    button.bounce{
+      animation:bounce .35s ease;
+    }
+    @keyframes bounce{
+      0%{transform:scale(1);}
+      40%{transform:scale(1.16);}
+      70%{transform:scale(.96);}
+      100%{transform:scale(1);}
+    }
+    .fade-out{
+      opacity:0;
+      transform:translateY(-10px);
+      pointer-events:none;
+      transition:all .4s ease;
+    }
+
+    /* 全屏气泡层 */
+    .bubble-layer{
+      position:fixed;
+      inset:0;
+      padding:8px;
+      z-index:3;
+      overflow:hidden;
+      display:none;
+    }
+    .bubble{
+      position:absolute;
+      padding:9px 13px;
+      border-radius:18px;
+      background:var(--accent-soft);
+      font-size:15px;
+      line-height:1.5;
+      color:#ff5070;
+      box-shadow:0 3px 10px rgba(0,0,0,.06);
+      display:inline-flex;
+      align-items:flex-start;
+      gap:5px;
+      word-break:break-word;
+      max-width:min(260px, 52vw);
+      animation:bubbleIn .35s cubic-bezier(.21,.67,.33,1.35);
+      transform-origin:center;
+    }
+    .bubble span.icon{
+      font-size:17px;
+      line-height:1.2;
+    }
+    .bubble span.text{
+      display:inline-block;
+    }
+
+    @keyframes bubbleIn{
+      0%{
+        opacity:0;
+        transform:translateY(14px) scale(.4) rotate(-4deg);
+      }
+      55%{
+        opacity:1;
+        transform:translateY(-4px) scale(1.06) rotate(2deg);
+      }
+      100%{
+        opacity:1;
+        transform:translateY(0) scale(1) rotate(0deg);
+      }
+    }
+
+    .hint{
+      position:fixed;
+      bottom:10px;
+      right:12px;
+      font-size:10px;
+      color:#c4c4c4;
+      z-index:4;
+      display:none;
+      text-align:right;
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts" id="hearts"></div>
+
+  <div class="top-title">
+    <h1>立冬快乐 ❄️｜我们的第六个冬天</h1>
+    <p>点开看到，这一屏都写满了想对你说的话 💗</p>
+  </div>
+
+  <div class="center" id="center">
+    <p class="question" id="question">
+      乖乖，今天立冬了，你愿不愿意和我一起过我们的第六个冬天呀？
+    </p>
+    <div class="btns" id="btns">
+      <button id="yesBtn">愿意 💖</button>
+      <button class="secondary" id="noBtn">不愿意 🙈</button>
+    </div>
+  </div>
+
+  <div class="bubble-layer" id="bubbleLayer"></div>
+  <div class="hint" id="hint">（别管按钮了，小气泡会一直长出来，这些都是我想对你说的。）</div>
+
+  <script>
+    // ===== 文案池 =====
+    const RAW_MESSAGES = [
+      "我不是很会说情话，但我每天都很认真在喜欢你 💗",
+      "不跟你说大道理，只想把你照顾好 🥺",
+      "我疼爱你呀 乖乖 🐻",
+      "你不用怀疑自己，我会一直站在你这边 🫶",
+      "和你一起走过这么多季节，我更确定是你 🌱",
+      "你冷的时候我比你紧张 🙈",
+      "想到你的时候心里就软，因为怕你在外面累 🫧",
+      "对别人是冷静，对你会变得很偏心 😼",
+      "遇见你以前，冬天只会冷；遇见你之后，冬天开始变得很好看 ❄️",
+      "今天也要好好吃饭，乖乖的身体我要负责照顾 🍲",
+      "你做得已经很好了，我想多给你一点安心 🤍",
+      "宝宝最乖啦 💕",
+      "不跟别人撒娇，想把幼稚留给你 🧸",
+      "你的小情绪，我都想认真听完 📝",
+      "你在我心里是“置顶聊天” 📌",
+      "以后的冬天，我都希望你可以多一点暖一点 ☕️",
+      "你累了就说，我是你的休息站 ⛺️",
+      "你是我心里偷偷反复确认的那个人 ✅",
+      "世界有点吵，但你在我这永远是特殊对待 🕊",
+      "看到你的名字亮起来，我会不自觉笑一下 😊",
+      "冷风吹到你那里，记得有我这件外套和怀抱 🧥",
+      "我会在你身后撑伞，也想和你一起淋一点雨 ☔️",
+      "你不用很完美，你现在这样就已经让我很心动 ✨",
+      "和你吵架的时候也在小心翼翼，因为太怕失去你 😔",
+      "你说“到家啦”的那一刻，我才真正放心 🏡",
+      "和你一起走到现在，是我最骄傲的小成就 🏅",
+      "你不开心的时候，我就会开始反思怎么陪你更好 🤔",
+      "我会认真记得你讲过的小细节，因为都是关于你 🧷",
+      "想把所有好东西都分一半给你，运气也给你一点 🍀",
+      "你在我心里不是选项，是答案 ✅",
+      "以后看到立冬就会想到：又和你多过了一年 🗓",
+      "你不用怕麻烦我，你已经住进我生活里啦 🏠",
+      "路很长，我不赶时间，只想跟你慢慢走 🚶‍♀️🚶‍♂️",
+      "看到好看的东西会下意识想“这个你会不会喜欢” 🛍",
+      "你偶尔的小任性，其实让我更确定你把我当自己人 💞",
+      "想让你多睡会、多吃点、多被温柔对待 🥣",
+      "你在我心里，占的位置刚刚好又特别大 💓",
+      "以后如果你冷，我第一反应是抱住你 🫂",
+      "我超级喜欢“我们”两个字放在一起的样子 ✍️",
+      "和你聊天的记录可以刷很长都不腻 📱",
+      "你永远都可以来找我，不用犹豫，不用礼貌 🚪",
+      "我会学习怎么更好地爱你，因为你值得 🧡",
+      "你点开这个页面，我就觉得被宠到了 🤭",
+      "谢谢你愿意跟我一起过第六个冬天 🫰",
+      "以后还想和你一起过第七个、第八个、第很多个冬天 ❄️❄️❄️",
+      "你笑起来真好看，我想多看到几次 😌",
+      "有你一起，我开始觉得冬天也挺浪漫的 ✨",
+      "你是我所有计划里，都默认会在的位置 📍",
+      "这屏幕的小气泡很多，我对你的喜欢比它们还多 🫧",
+      "今天的风有点冷，不过没关系，我喜欢你这件事超保暖 🧣"
+    ];
+
+    const icons = ["💗","💕","💓","💞","🩷","✨","🥹","🤍","🫶","🐻","🐱","❄️","☃️","🧣","🫧","🌷","⭐️","📩","💌","🧸"];
+    function pickIcon(){ return icons[Math.floor(Math.random()*icons.length)]; }
+
+    const heartsEl = document.getElementById('hearts');
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const center = document.getElementById('center');
+    const bubbleLayer = document.getElementById('bubbleLayer');
+    const hint = document.getElementById('hint');
+    const btns = document.getElementById('btns');
+
+    let declineCount = 0;
+    let yesScale = 1;
+    let started = false;
+    let runawayInitialized = false;
+
+    // 逃跑偏移（只用 transform 做位移，确保每次都是动画，不闪现，也不和“愿意”重叠）
+    const runDeltas = [
+      { x: 160, y: -40 },  // 往右上逃
+      { x: -180, y: 40 },  // 往左下逃
+      { x: 150, y: 70 }    // 往右下逃
+    ];
+
+    function initRunawayPosition() {
+      if (runawayInitialized) return;
+      runawayInitialized = true;
+
+      const parentRect = btns.getBoundingClientRect();
+      const rect = noBtn.getBoundingClientRect();
+      const offsetLeft = rect.left - parentRect.left;
+      const offsetTop = rect.top - parentRect.top;
+
+      noBtn.style.position = "absolute";
+      noBtn.style.left = offsetLeft + "px";
+      noBtn.style.top = offsetTop + "px";
+      noBtn.style.transform = "translate(0,0)";
+    }
+
+    function moveNoBtn(step){
+      const d = runDeltas[(step - 1) % runDeltas.length];
+      const angle = (Math.random() > 0.5 ? 10 : -10);
+      noBtn.style.transform = `translate(${d.x}px, ${d.y}px) rotate(${angle}deg)`;
+    }
+
+    // 愿意：直接开启
+    yesBtn.addEventListener('click', () => {
+      if (!started) startLoveMode();
+    });
+
+    // 不愿意：逃跑 + 文案；第 5 次才真正开始（由她“自己点”）
+    noBtn.addEventListener('click', () => {
+      if (started) return;
+      declineCount++;
+
+      if (declineCount === 1) {
+        initRunawayPosition();
+        noBtn.textContent = "该点另一个，咋点错了 🙃";
+        moveNoBtn(declineCount);
+      } else if (declineCount === 2) {
+        noBtn.textContent = "好狠心呀 🥺";
+        moveNoBtn(declineCount);
+      } else if (declineCount === 3) {
+        noBtn.textContent = "再点这个我就是猪猪 🐷";
+        moveNoBtn(declineCount);
+      } else if (declineCount === 4) {
+        noBtn.textContent = "猪猪愿意和小邱过所有的冬天 💍";
+        moveNoBtn(declineCount); // 还是逃，但告诉她现在是“愿意”
+      } else if (declineCount >= 5) {
+        // 第 5 次及之后：她自己点“猪猪愿意…”，这才触发开始
+        if (!started) startLoveMode();
+        return;
+      }
+
+      // 前四次顺便放大“愿意”按钮
+      if (declineCount <= 4) {
+        yesScale *= 1.2;
+        yesBtn.style.transform = `scale(${yesScale})`;
+
+        yesBtn.classList.remove('bounce');
+        noBtn.classList.remove('bounce');
+        void yesBtn.offsetWidth;
+        yesBtn.classList.add('bounce');
+        noBtn.classList.add('bounce');
+      }
+    });
+
+    function startLoveMode(){
+      started = true;
+      center.classList.add('fade-out');
+
+      setTimeout(() => {
+        center.style.display = 'none';
+        bubbleLayer.style.display = 'block';
+        hint.style.display = 'block';
+        startHearts();
+        startBubbles();
+      }, 420);
+    }
+
+    // 心心
+    function startHearts(){
+      function spawnHeart(){
+        const h = document.createElement('div');
+        h.className = 'heart';
+        const size = 10 + Math.random()*18;
+        h.style.width = size+'px';
+        h.style.height = size+'px';
+        h.style.left = (Math.random()*100) + 'vw';
+        h.style.top  = (100 + Math.random()*10) + 'vh';
+        const colors = ["#ff7a90","#ffa3b1","#ff8f8f","#ff6b81","#ffd1d9"];
+        const c = colors[Math.floor(Math.random()*colors.length)];
+        h.style.background = c;
+        h.style.setProperty('--heart', c);
+        const dur = 7 + Math.random()*6;
+        h.style.animationDuration = dur + 's';
+        heartsEl.appendChild(h);
+        setTimeout(()=>h.remove(), dur*1000+800);
+      }
+      setInterval(() => {
+        if (!started) return;
+        const n = 1 + Math.floor(Math.random()*3);
+        for (let i=0; i<n; i++) spawnHeart();
+      }, 420);
+    }
+
+    // 气泡雨
+    function startBubbles(){
+      let total = 0;
+
+      function pushBubble(){
+        if (!started) return;
+
+        const msg = RAW_MESSAGES[Math.floor(Math.random()*RAW_MESSAGES.length)];
+
+        const b = document.createElement('div');
+        b.className = 'bubble';
+
+        const iconEl = document.createElement('span');
+        iconEl.className = 'icon';
+        iconEl.textContent = pickIcon();
+
+        const textEl = document.createElement('span');
+        textEl.className = 'text';
+        textEl.textContent = msg;
+
+        b.appendChild(iconEl);
+        b.appendChild(textEl);
+        bubbleLayer.appendChild(b);
+
+        const layerRect = bubbleLayer.getBoundingClientRect();
+        const bubbleRect = b.getBoundingClientRect();
+        const maxLeft = Math.max(4, layerRect.width - bubbleRect.width - 6);
+        const maxTop  = Math.max(24, layerRect.height - bubbleRect.height - 14);
+
+        const left = 4 + Math.random() * maxLeft;
+        const top  = 24 + Math.random() * maxTop;
+
+        b.style.left = left + 'px';
+        b.style.top  = top + 'px';
+
+        total++;
+
+        let delay;
+        if (total < 60) {
+          delay = 70 + Math.random()*45;
+        } else if (total < 220) {
+          delay = 140 + Math.random()*130;
+        } else {
+          delay = 260 + Math.random()*220;
+        }
+
+        if (total > 450 && bubbleLayer.children.length > 320) {
+          bubbleLayer.removeChild(bubbleLayer.firstChild);
+        }
+
+        setTimeout(pushBubble, delay);
+      }
+
+      setTimeout(pushBubble, 160);
+    }
+  </script>
+</body>
+</html>
